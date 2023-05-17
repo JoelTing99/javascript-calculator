@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css"
 
-const operators = ["+", "-", "*", "/", "clear", "="]
+const operators = ["+", "-", "*", "/", "clear", "="];
+const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 /*
 export default class App extends React.Component {
   constructor(props) {
@@ -255,13 +256,15 @@ export default class App extends React.Component {
 function App()
 {
   const [displayText, setDisplayText] = useState("0");
-  const [calculatorData, setCalculatorData] = useState('')
+  const [calculatorData, setCalculatorData] = useState("")
 
   function handleButtonClick(event) 
   {
     const value = event.target.value;
 
-    console.log(displayText, value);
+    const operator = operators.find(op => op === value);
+    const number = numbers.find(num => num === value);
+    console.log(calculatorData, value);
     switch (value)
     {
       case 'clear':
@@ -279,15 +282,12 @@ function App()
       case 'percentage':
         Percentage();
         break;
+      case number:
+        Numbers(value);
+        break;
+      case operator:
+        Operators(value);
       default:
-        if (operators.includes(value))
-        {
-          Operators(value);
-        }
-        else 
-        {
-          Numbers(value);
-        }
         break;
     }
   }
@@ -308,7 +308,7 @@ function App()
         const lastChat = calculatorData.charAt(calculatorData.length - 1);
         const isLastChatOperator = operators.includes(lastChat);
 
-        setDisplayText(isLastChatOperator ? value : `${displayText}${value}`);
+        setDisplayText(isLastChatOperator ? value : displayText + value);
         setCalculatorData(calculatorData + value);
       }
     }
@@ -317,32 +317,29 @@ function App()
   function Operators(value)
   {
     if (calculatorData.length) {
-      setDisplayText(`${value}`);
-      const beforeLastChat = calculatorData.charAt(calculatorData.length - 2);
+      setDisplayText(value);
 
-      const beforeLastChatIsOperator =
-        operators.includes(beforeLastChat) || beforeLastChat === "*";
+      const beforeLastChat = calculatorData.charAt(calculatorData.length - 2);
+      const beforeLastChatIsOperator = operators.includes(beforeLastChat);
 
       const lastChat = calculatorData.charAt(calculatorData.length - 1);
-      
-      const lastChatIsOperator = operators.includes(lastChat) || lastChat === "*";
-      
-      const validOp = value === "x" ? "*" : value;
-      if (
-        (lastChatIsOperator && value !== "-") ||
-        beforeLastChatIsOperator && lastChatIsOperator
-      ) {
+      const lastChatIsOperator = operators.includes(lastChat);
+
+      if ((lastChatIsOperator && value !== "-") || beforeLastChatIsOperator && lastChatIsOperator
+      ) 
+      {
         if (beforeLastChatIsOperator) {
-          const updatedValue = `${calculatorData.substring(
-            0,
-            calculatorData.length - 2
-          )}${value}`;
-          setCalculatorData(updatedValue);
-        } else {
-          setCalculatorData(`${calculatorData.substring(0, calculatorData.length - 1)}${validOp}`);
+          setCalculatorData(calculatorData.substring(0, calculatorData.length - 2
+            ) + value);
+        } 
+        else 
+        {
+          setCalculatorData(calculatorData.substring(0, calculatorData.length - 1) + value);
         }
-      } else {
-        setCalculatorData(`${calculatorData}${validOp}`);
+      } 
+      else 
+      {
+        setCalculatorData(calculatorData + value);
       }
     }
   }
@@ -350,7 +347,7 @@ function App()
   function Clear() 
   {
     setDisplayText("0");
-    setCalculatorData('');
+    setCalculatorData("");
   }
 
   function Reverse() {
@@ -364,30 +361,28 @@ function App()
       setDisplayText("0.");
       setCalculatorData("0.");
     } else {
-      if (lastChat === "*" || operators.includes(lastChat)) {
+      if (operators.includes(lastChat)) 
+      {
         setDisplayText("0.");
-        setCalculatorData(`${calculatorData} 0.`);
-      } else {
-        setDisplayText(
-          lastChat === "." || displayText.includes(".") ? `${displayText}` : `${displayText}.`
-        );
-        const formattedValue =
-          lastChat === "." || displayText.includes(".")
-            ? `${calculatorData}`
-            : `${calculatorData}.`;
-        setCalculatorData(formattedValue);
+        setCalculatorData(calculatorData + "0.");
+      } 
+      else
+      {
+        setDisplayText(lastChat === "." || displayText.includes(".") ? displayText : displayText + ".");
+
+        setCalculatorData(lastChat === "." || displayText.includes(".") ? calculatorData : calculatorData + ".");
       }
     }
   }
 
   function Equal()
   {
-    console.log({ calculatorData });
-
-    let total = eval(calculatorData);
-
+    let total = eval(calculatorData).toString();
+    
+    console.log( total, typeof(total));
+    
     setDisplayText(total);
-    setCalculatorData(total);
+    setCalculatorData(total.toString());
   }
 
   function Percentage() {
